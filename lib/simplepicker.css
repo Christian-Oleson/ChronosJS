@@ -14,7 +14,7 @@
   display: block;
 }
 
-.simpilepicker-date-picker {
+.simplepicker-date-picker {
   width: 326px;
   cursor: initial;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -156,12 +156,13 @@
 .simplepicker-calender tbody td:active,
 .simplepicker-calender tbody td.active {
   color: #fff;
+  isolation: isolate;
 }
 
 .simplepicker-calender tbody td:active::after,
 .simplepicker-calender tbody .active::after {
   visibility: visible;
-  background-color:teal;
+  background-color: teal;
   z-index: -1;
 }
 
