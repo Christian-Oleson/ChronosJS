@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import SimplePicker from '../lib/index';
 import { monthTracker, scrapeMonth, scrapeNextMonth } from '../lib/date-util';
 
@@ -119,7 +120,7 @@ describe('SimplePicker.on()', () => {
 
   it('should call submit handler when OK button is clicked', () => {
     const picker = new SimplePicker();
-    const handler = jest.fn();
+    const handler = vi.fn();
     picker.on('submit', handler);
     picker.open();
 
@@ -135,7 +136,7 @@ describe('SimplePicker.on()', () => {
 
   it('should call close handler when Cancel button is clicked', () => {
     const picker = new SimplePicker();
-    const handler = jest.fn();
+    const handler = vi.fn();
     picker.on('close', handler);
     picker.open();
 
@@ -147,8 +148,8 @@ describe('SimplePicker.on()', () => {
 
   it('should allow multiple handlers for the same event', () => {
     const picker = new SimplePicker();
-    const handler1 = jest.fn();
-    const handler2 = jest.fn();
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
     picker.on('submit', handler1);
     picker.on('submit', handler2);
     picker.open();

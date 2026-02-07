@@ -1,5 +1,4 @@
 const path = require('path');
-const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
 
 const ROOT_DIR = __dirname;
 module.exports = function (env) {
@@ -18,7 +17,7 @@ module.exports = function (env) {
       libraryTarget: 'var'
     },
     resolve: {
-      extensions: [ '.css', '.ts', '.js' ]
+      extensions: ['.css', '.ts', '.js']
     },
     context: ROOT_DIR,
     target: 'web',
@@ -27,53 +26,43 @@ module.exports = function (env) {
     optimization: {
       moduleIds: 'deterministic'
     },
-    plugins: [
-      new MiniCSSExtractPlugin({
-        filename: '[name].css',
-        chunkFilename: '[id].css'
-      })
-    ]
+    experiments: {
+      css: true
+    },
+    module: {
+      rules: [
+        {
+          test: /\.css$/,
+          type: 'css'
+        },
+        {
+          test: /\.ts$/,
+          exclude: [/node_modules/, /tests/],
+          loader: 'builtin:swc-loader',
+          options: {
+            jsc: {
+              parser: {
+                syntax: 'typescript',
+              },
+              target: 'es5',
+            },
+          },
+          type: 'javascript/auto',
+        }
+      ]
+    }
   };
 
-  config.module = {};
-  config.module.rules = [
-    {
-      test: /\.css$/,
-      use: [
-        MiniCSSExtractPlugin.loader,
-        {
-          loader: 'css-loader',
-          options: {
-            sourceMap: true
-          }
-        },
-      ]
-    },{
-      test: /\.ts$/,
-      use: 'ts-loader',
-      exclude: [/node_modules/, /tests/]
-    }
-  ];
-
   if (production) {
-    config.module.rules.push({
-      test: /\.js$/,
-      exclude: /node_modules/,
-      use: {
-        loader: 'babel-loader',
-        options: { presets: ['@babel/env'] }
-      }
-    });
-
     // build a commonjs format file for consumption with
-    // build tools like webpack, and rollup.
+    // build tools like webpack, rspack, and rollup.
     let nodeConfig = { output: {} };
     nodeConfig.output.libraryTarget = 'commonjs2';
     nodeConfig.entry = {
       'simplepicker.node': './lib/index.ts'
     };
 
-    config = [ config, { ...config, ...nodeConfig } ];
+    config = [config, { ...config, ...nodeConfig }];
   } else {
     config.output.publicPath = '/dist/';
   }
