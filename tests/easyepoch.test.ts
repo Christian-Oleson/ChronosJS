@@ -520,6 +520,59 @@ describe('EasyEpoch theming', () => {
   });
 });
 
+describe('EasyEpoch multiple pickers on same parent', () => {
+  it('should not cross-contaminate when multiple pickers share the same parent', () => {
+    const picker1 = new EasyEpoch();
+    const picker2 = new EasyEpoch({ compactMode: true });
+    const picker3 = new EasyEpoch({ disableTimeSection: true });
+
+    const wrappers = document.querySelectorAll('.easyepoch-wrapper');
+    expect(wrappers.length).toBe(3);
+
+    // Each picker should control its own wrapper
+    picker1.open();
+    expect(wrappers[0].classList.contains('active')).toBe(true);
+    expect(wrappers[1].classList.contains('active')).toBe(false);
+    expect(wrappers[2].classList.contains('active')).toBe(false);
+    picker1.close();
+
+    picker2.open();
+    expect(wrappers[0].classList.contains('active')).toBe(false);
+    expect(wrappers[1].classList.contains('active')).toBe(true);
+    expect(wrappers[2].classList.contains('active')).toBe(false);
+    picker2.close();
+
+    picker3.open();
+    expect(wrappers[0].classList.contains('active')).toBe(false);
+    expect(wrappers[1].classList.contains('active')).toBe(false);
+    expect(wrappers[2].classList.contains('active')).toBe(true);
+    picker3.close();
+  });
+
+  it('should not apply compactMode to other pickers wrappers', () => {
+    const picker1 = new EasyEpoch();
+    const picker2 = new EasyEpoch({ compactMode: true });
+
+    const wrappers = document.querySelectorAll('.easyepoch-wrapper');
+    const date1 = wrappers[0].querySelector('.easyepoch-date') as HTMLElement;
+    const date2 = wrappers[1].querySelector('.easyepoch-date') as HTMLElement;
+
+    expect(date1.style.display).not.toBe('none');
+    expect(date2.style.display).toBe('none');
+  });
+
+  it('should apply setTheme to the correct picker when multiple exist', () => {
+    const picker1 = new EasyEpoch();
+    const picker2 = new EasyEpoch();
+
+    const wrappers = document.querySelectorAll('.easyepoch-wrapper');
+
+    picker1.setTheme('light');
+    expect(wrappers[0].classList.contains('easyepoch-theme-light')).toBe(true);
+    expect(wrappers[1].classList.contains('easyepoch-theme-light')).toBe(false);
+  });
+});
+
 describe('EasyEpoch inline SVG icons', () => {
   it('should render SVG elements inside icon buttons', () => {
     const picker = new EasyEpoch();
