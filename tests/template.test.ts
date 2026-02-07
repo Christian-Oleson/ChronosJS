@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { htmlTemplate } from '../lib/template';
 
 describe('htmlTemplate', () => {
