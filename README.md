@@ -44,6 +44,7 @@ Creates a new picker instance and inserts it into the DOM.
   - `disableTimeSection` (`boolean`): If `true`, disables the time picker section.
   - `compactMode` (`boolean`): If `true`, hides the large selected-date display for a more compact layout.
   - `selectedDate` (`Date`): Initialize the picker with this date. Defaults to today.
+  - `theme` (`'light'` | `'dark'` | `Record<string, string>`): Sets the color theme. Defaults to `'dark'`. See [Theming](#theming).
 
 The first argument can be `opts` directly if no element is needed.
 
@@ -97,6 +98,83 @@ Disables the time picker section.
 ### `picker.enableTimeSection()`
 
 Re-enables the time picker section if previously disabled.
+
+### `picker.setTheme(theme)`
+
+- `theme` (required, `'light'` | `'dark'` | `Record<string, string>`) - The theme to apply.
+
+Switches the picker's theme at runtime. Accepts a built-in theme name or a custom theme object.
+
+```javascript
+picker.setTheme('light');
+picker.setTheme('dark');
+picker.setTheme({ bg: '#0a0a0a', primary: '#ff6b6b', text: '#f0f0f0' });
+```
+
+## Theming
+
+EasyEpoch uses CSS custom properties for all colors and visual styles. The dark theme is the default.
+
+### Built-in themes
+
+Pass a theme name via the constructor or `setTheme()`:
+
+```javascript
+const picker = new EasyEpoch({ theme: 'light' });
+
+// Switch at runtime
+picker.setTheme('dark');
+```
+
+### Custom theme objects
+
+Pass an object whose keys are CSS variable names (with or without the `--easyepoch-` prefix):
+
+```javascript
+picker.setTheme({
+  bg: '#0a0a0a',
+  primary: '#ff6b6b',
+  secondary: '#ffd93d',
+  accent: '#ff6b6b',
+  text: '#f0f0f0',
+});
+```
+
+### CSS-only override
+
+You can also override variables directly in your own stylesheet without any JavaScript:
+
+```css
+.easyepoch-wrapper {
+  --easyepoch-primary: #ff6b6b;
+  --easyepoch-secondary: #ffd93d;
+  --easyepoch-bg: #0a0a0a;
+}
+```
+
+### Available CSS custom properties
+
+| Variable | Description |
+|---|---|
+| `--easyepoch-bg` | Picker body background |
+| `--easyepoch-text` | Primary text color |
+| `--easyepoch-text-secondary` | Subdued text (table headers) |
+| `--easyepoch-text-muted` | Faded/disabled text |
+| `--easyepoch-primary` | Primary accent color |
+| `--easyepoch-secondary` | Secondary accent color |
+| `--easyepoch-accent` | Button/icon tint color |
+| `--easyepoch-header-bg` | Day-of-week header background |
+| `--easyepoch-date-section-bg` | Date display section background |
+| `--easyepoch-selected-bg` | Active date cell / button hover background |
+| `--easyepoch-hover-bg` | Date cell hover background |
+| `--easyepoch-border` | Border/divider color |
+| `--easyepoch-overlay-bg` | Backdrop overlay color |
+| `--easyepoch-shadow` | Picker box shadow |
+| `--easyepoch-cell-text` | Calendar cell text color |
+| `--easyepoch-cell-hover-text` | Calendar cell hover text color |
+| `--easyepoch-cell-active-text` | Active/selected cell text color |
+| `--easyepoch-input-border` | Time input border color |
+| `--easyepoch-btn-hover-text` | Button hover text color |
 
 ## Development
 
