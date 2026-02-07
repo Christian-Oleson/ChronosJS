@@ -1,4 +1,5 @@
 import * as dateUtil from './date-util';
+import { MonthTracker } from './date-util';
 import { htmlTemplate } from './template';
 
 type SimplePickerEvent = 'submit' | 'close';
@@ -19,7 +20,6 @@ interface EventHandlers {
   [key: string]: HandlerFunction[];
 }
 
-const today = new Date();
 class SimplePicker {
   selectedDate: Date;
   $simplePicker: HTMLElement;
@@ -44,6 +44,7 @@ class SimplePicker {
   private $cancel: HTMLElement;
   private $ok: HTMLElement;
   private $displayDateElements: HTMLElement[];
+  private monthTracker: MonthTracker;
 
   constructor(arg1?: HTMLElement | string | SimplePickerOpts, arg2?: SimplePickerOpts) {
     let el: HTMLElement | undefined = undefined;
@@ -71,6 +72,7 @@ class SimplePicker {
     }
 
     this.selectedDate = new Date();
+    this.monthTracker = dateUtil.createMonthTracker();
     this.injectTemplate(el);
     this.init(el, opts);
     this.initListeners();
@@ -92,7 +94,7 @@ class SimplePicker {
     this.initElMethod(this.$simplepickerWrapper);
 
     const { $, $$ } = this;
-    this.$simplepicker = $('.simpilepicker-date-picker');
+    this.$simplepicker = $('.simplepicker-date-picker');
     this.$trs = $$('.simplepicker-calender tbody tr');
     this.$tds = $$('.simplepicker-calender tbody td');
     this.$headerMonthAndYear = $('.simplepicker-month-and-year');
@@ -112,12 +114,13 @@ class SimplePicker {
     ];
 
     this.$time.classList.add('simplepicker-fade');
-    this.render(dateUtil.scrapeMonth(today));
+    const now = new Date();
+    this.render(dateUtil.scrapeMonth(now, this.monthTracker));
 
     opts = opts || {};
     this.opts = opts;
 
-    this.reset(opts.selectedDate || today);
+    this.reset(opts.selectedDate || now);
 
     if (opts.zIndex !== undefined) {
       this.$simplepickerWrapper.style.zIndex = opts.zIndex.toString();
@@ -135,7 +138,7 @@ class SimplePicker {
   // Reset by selecting current date.
   reset(newDate?: Date) {
     let date = newDate || new Date();
-    this.render(dateUtil.scrapeMonth(date));
+    this.render(dateUtil.scrapeMonth(date, this.monthTracker));
 
     // The timeFull variable below will be formatted as HH:mm:ss.
     // Using regular experssion we remove the :ss parts.
@@ -146,7 +149,7 @@ class SimplePicker {
 
     const dateString = date.getDate().toString();
     const $dateEl = this.findElementWithDate(dateString);
-    if (!$dateEl.classList.contains('active')) {
+    if ($dateEl && !$dateEl.classList.contains('active')) {
       this.selectDateElement($dateEl);
       this.updateDateComponents(date);
     }
@@ -261,7 +264,7 @@ class SimplePicker {
     let _date = day + ' ';
     _date += $monthAndYear.innerHTML.trim() + ' ';
     _date += $time.innerHTML.trim();
-    this.readableDate = _date.replace(/^\d+/, date.getDate().toString());
+    this.readableDate = _date.replace(/^\d+/, dateUtil.getDisplayDate(date));
   }
 
   selectDateElement(el: HTMLElement) {
@@ -314,7 +317,7 @@ class SimplePicker {
       $timeSection.style.display = 'none';
       $timeIcon.classList.remove('active');
       el.classList.add('active');
-      this.toogleDisplayFade();
+      this.toggleDisplayFade();
       return;
     }
 
@@ -327,7 +330,7 @@ class SimplePicker {
       $calenderSection.style.display = 'none';
       $calenderIcon.classList.remove('active');
       el.classList.add('active');
-      this.toogleDisplayFade();
+      this.toggleDisplayFade();
       return;
     }
 
@@ -338,11 +341,11 @@ class SimplePicker {
     }
 
     if (el.classList.contains(nextIcon)) {
-      this.render(dateUtil.scrapeNextMonth());
+      this.render(dateUtil.scrapeNextMonth(this.monthTracker));
     }
 
     if (el.classList.contains(previousIcon)) {
-      this.render(dateUtil.scrapePreviousMonth());
+      this.render(dateUtil.scrapePreviousMonth(this.monthTracker));
     }
 
     if (selectedDate) {
@@ -362,7 +365,7 @@ class SimplePicker {
       const tagName = target.tagName.toLowerCase();
 
       e.stopPropagation();
-      if (tagName === 'td') {
+      if (tagName === 'td' && target.dataset.empty === undefined) {
         _this.selectDateElement(target);
         return;
       }
@@ -426,7 +429,7 @@ class SimplePicker {
     _eventHandlers[event].push(handler);
   }
 
-  toogleDisplayFade() {
+  toggleDisplayFade() {
     this.$time.classList.toggle('simplepicker-fade');
     this.$displayDateElements.forEach($el => {
       $el.classList.toggle('simplepicker-fade');

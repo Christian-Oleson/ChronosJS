@@ -11,8 +11,8 @@ describe('htmlTemplate', () => {
     expect(htmlTemplate).toContain('simplepicker-wrapper');
   });
 
-  it('should contain the date picker class (note: known typo "simpilepicker")', () => {
-    expect(htmlTemplate).toContain('simpilepicker-date-picker');
+  it('should contain the date picker class', () => {
+    expect(htmlTemplate).toContain('simplepicker-date-picker');
   });
 
   it('should contain the day header', () => {
@@ -89,7 +89,7 @@ describe('htmlTemplate', () => {
     const container = document.createElement('div');
     container.innerHTML = htmlTemplate;
     expect(container.querySelector('.simplepicker-wrapper')).not.toBeNull();
-    expect(container.querySelector('.simpilepicker-date-picker')).not.toBeNull();
+    expect(container.querySelector('.simplepicker-date-picker')).not.toBeNull();
     expect(container.querySelector('.simplepicker-calender')).not.toBeNull();
   });
 });

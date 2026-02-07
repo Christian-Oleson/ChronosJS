@@ -9,7 +9,7 @@ function repeat(str: string, times: number): string {
 
 export const htmlTemplate = `
 <div class="simplepicker-wrapper">
-  <div class="simpilepicker-date-picker">
+  <div class="simplepicker-date-picker">
     <div class="simplepicker-day-header"></div>
       <div class="simplepicker-date-section">
         <div class="simplepicker-month-and-year"></div>

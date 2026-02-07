@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import SimplePicker from '../lib/index';
-import { monthTracker, scrapeMonth, scrapeNextMonth } from '../lib/date-util';
+import { monthTracker, scrapeMonth, scrapeNextMonth, scrapePreviousMonth } from '../lib/date-util';
 
 beforeEach(() => {
   // Clean up any previous picker DOM
@@ -440,9 +440,9 @@ describe('SimplePicker public properties', () => {
   });
 });
 
-describe('Known bugs', () => {
-  describe('Bug: readableDate missing ordinal suffix', () => {
-    it('readableDate should ideally contain ordinal suffix but currently does not', () => {
+describe('Bug fixes', () => {
+  describe('readableDate includes ordinal suffix', () => {
+    it('readableDate should contain ordinal suffix like "1st"', () => {
       const picker = new SimplePicker({ selectedDate: new Date(2024, 0, 1, 12, 0) });
       picker.open();
 
@@ -453,35 +453,38 @@ describe('Known bugs', () => {
       });
       okBtn.click();
 
-      // This documents the current (buggy) behavior: no ordinal suffix in readableDate
-      // The readableDate contains just the number, not "1st"
-      // A fixed version would have "1st January 2024 12:00 PM"
-      expect(capturedReadable).toMatch(/^\d+ January 2024/);
+      expect(capturedReadable).toMatch(/^1st January 2024/);
     });
   });
 
-  describe('Bug: clicking empty calendar cell', () => {
-    it('should handle clicks on empty cells without crashing', () => {
+  describe('clicking empty calendar cell is ignored', () => {
+    it('should not select empty cells when clicked', () => {
       const picker = new SimplePicker();
+      const activeBefore = document.querySelector('.simplepicker-calender tbody td.active');
+      const activeContentBefore = activeBefore ? activeBefore.innerHTML.trim() : '';
+
       const tds = document.querySelectorAll('.simplepicker-calender tbody td');
-      // Find an empty td
       let emptyTd: HTMLElement | null = null;
       tds.forEach(td => {
-        if (td.innerHTML.trim() === '' || td.getAttribute('data-empty') !== null) {
+        if (td.getAttribute('data-empty') !== null) {
           emptyTd = td as HTMLElement;
         }
       });
 
-      // Currently this will set invalid data - documenting the bug
       if (emptyTd) {
-        // This should not throw, but it sets empty/invalid date data
-        expect(() => (emptyTd as HTMLElement).click()).not.toThrow();
+        (emptyTd as HTMLElement).click();
+        // Active cell should not have changed
+        const activeAfter = document.querySelector('.simplepicker-calender tbody td.active');
+        expect(activeAfter).not.toBeNull();
+        expect(activeAfter!.innerHTML.trim()).toBe(activeContentBefore);
+        // The empty cell should not become active
+        expect((emptyTd as HTMLElement).classList.contains('active')).toBe(false);
       }
     });
   });
 
-  describe('Bug: error message typo in scrapeNextMonth', () => {
-    it('scrapeNextMonth error message incorrectly says "scrapePrevoisMonth"', () => {
+  describe('error messages have correct function names', () => {
+    it('scrapeNextMonth error message says "scrapeNextMonth"', () => {
       monthTracker.current = undefined;
       let errorMessage = '';
       try {
@@ -489,27 +492,51 @@ describe('Known bugs', () => {
       } catch (e: any) {
         errorMessage = e.message;
       }
-      // The error message says "scrapePrevoisMonth" even though this is scrapeNextMonth
-      expect(errorMessage).toContain('scrapePrevoisMonth');
+      expect(errorMessage).toContain('scrapeNextMonth');
     });
   });
 
-  describe('Bug: simpilepicker typo in class name', () => {
-    it('inner picker div uses "simpilepicker" instead of "simplepicker"', () => {
+  describe('simplepicker class name is spelled correctly', () => {
+    it('inner picker div uses "simplepicker-date-picker"', () => {
       const picker = new SimplePicker();
-      // The typo exists - querying by the misspelled class should find the element
-      expect(document.querySelector('.simpilepicker-date-picker')).not.toBeNull();
-      // The correctly-spelled version should NOT exist
-      expect(document.querySelector('.simplepicker-date-picker')).toBeNull();
+      expect(document.querySelector('.simplepicker-date-picker')).not.toBeNull();
+      // The old typo should NOT exist
+      expect(document.querySelector('.simpilepicker-date-picker')).toBeNull();
     });
   });
 
-  describe('Bug: scrapeMonth crashes for months with exactly 4 calendar rows', () => {
-    it('should crash for February 2026 (starts Sunday, 28 days = exactly 4 rows)', () => {
-      // February 2026 starts on Sunday and has 28 days, fitting perfectly in 4 rows.
-      // The scrapeMonth function assumes at least 5 rows and crashes when
-      // tracker[4] is undefined at line 94: tracker[lastRow].length
-      expect(() => scrapeMonth(new Date(2026, 1, 1))).toThrow();
+  describe('scrapeMonth handles months with exactly 4 calendar rows', () => {
+    it('should not crash for February 2026 (starts Sunday, 28 days = exactly 4 rows)', () => {
+      expect(() => scrapeMonth(new Date(2026, 1, 1))).not.toThrow();
+    });
+  });
+
+  describe('multiple instances have independent month tracking', () => {
+    it('navigating months in one picker should not affect another', () => {
+      const div1 = document.createElement('div');
+      div1.className = 'picker-a';
+      document.body.appendChild(div1);
+
+      const div2 = document.createElement('div');
+      div2.className = 'picker-b';
+      document.body.appendChild(div2);
+
+      const picker1 = new SimplePicker('.picker-a');
+      const picker2 = new SimplePicker('.picker-b');
+
+      // Navigate picker1 forward
+      const nextBtn1 = div1.querySelector('.simplepicker-icon-next') as HTMLElement;
+      nextBtn1.click();
+
+      // Picker2's selected-date should still show the current month
+      const now = new Date();
+      const currentMonthName = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ][now.getMonth()];
+
+      const picker2SelectedDate = div2.querySelector('.simplepicker-selected-date');
+      expect(picker2SelectedDate!.innerHTML).toContain(currentMonthName);
     });
   });
 });

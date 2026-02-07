@@ -44,7 +44,11 @@ function fill<T>(arr: T[], upto: number): T[] {
 
 // builds the calender for one month given a date
 // which is end, start or in middle of the month
-export function scrapeMonth(date: Date) {
+export function createMonthTracker(): MonthTracker {
+  return { years: {} };
+}
+
+export function scrapeMonth(date: Date, tracker: MonthTracker = monthTracker) {
   const originalDate = new Date(date.getTime());
   const year = date.getFullYear();
   const month = date.getMonth();
@@ -54,29 +58,29 @@ export function scrapeMonth(date: Date) {
     month: undefined
   };
 
-  monthTracker.current = new Date(date.getTime());
-  monthTracker.current.setDate(1);
-  monthTracker.years[year] = monthTracker.years[year] || {};
-  if (monthTracker.years[year][month] !== undefined) {
-    data.month = monthTracker.years[year][month];
+  tracker.current = new Date(date.getTime());
+  tracker.current.setDate(1);
+  tracker.years[year] = tracker.years[year] || {};
+  if (tracker.years[year][month] !== undefined) {
+    data.month = tracker.years[year][month];
     return data;
   }
 
   date = new Date(date.getTime());
   date.setDate(1);
-  monthTracker.years[year][month] = [];
+  tracker.years[year][month] = [];
 
-  let tracker = monthTracker.years[year][month];
+  let monthData = tracker.years[year][month];
   let rowTracker = 0;
   while (date.getMonth() === month) {
     const _date = date.getDate();
     const day = date.getDay();
     if (_date === 1) {
-      tracker[rowTracker] = fill([], day);
+      monthData[rowTracker] = fill([], day);
     }
 
-    tracker[rowTracker] = tracker[rowTracker] || [];
-    tracker[rowTracker][day] = _date;
+    monthData[rowTracker] = monthData[rowTracker] || [];
+    monthData[rowTracker][day] = _date;
 
     if (day === 6) {
       rowTracker++;
@@ -86,39 +90,43 @@ export function scrapeMonth(date: Date) {
   }
 
   let lastRow = 5;
-  if (tracker[5] === undefined) {
+  if (monthData[5] === undefined) {
     lastRow = 4;
-    tracker[5] = fill([], 7);
+    monthData[5] = fill([], 7);
+  }
+  if (monthData[4] === undefined) {
+    lastRow = 3;
+    monthData[4] = fill([], 7);
   }
 
-  let lastRowLength = tracker[lastRow].length;
+  let lastRowLength = monthData[lastRow].length;
   if (lastRowLength < 7) {
-    let filled = tracker[lastRow].concat(fill([], 7 - lastRowLength));
-    tracker[lastRow] = filled;
+    let filled = monthData[lastRow].concat(fill([], 7 - lastRowLength));
+    monthData[lastRow] = filled;
   }
 
-  data.month = tracker;
+  data.month = monthData;
   return data;
 }
 
-export function scrapePreviousMonth() {
-  const date = monthTracker.current;
+export function scrapePreviousMonth(tracker: MonthTracker = monthTracker) {
+  const date = tracker.current;
   if (!date) {
-    throw Error('scrapePrevoisMonth called without setting monthTracker.current!');
+    throw Error('scrapePreviousMonth called without setting monthTracker.current!');
   }
 
   date.setMonth(date.getMonth() - 1);
-  return scrapeMonth(date);
+  return scrapeMonth(date, tracker);
 }
 
-export function scrapeNextMonth() {
-  const date = monthTracker.current;
+export function scrapeNextMonth(tracker: MonthTracker = monthTracker) {
+  const date = tracker.current;
   if (!date) {
-    throw Error('scrapePrevoisMonth called without setting monthTracker.current!');
+    throw Error('scrapeNextMonth called without setting monthTracker.current!');
   }
 
   date.setMonth(date.getMonth() + 1);
-  return scrapeMonth(date);
+  return scrapeMonth(date, tracker);
 }
 
 const dateEndings = {
@@ -127,7 +135,7 @@ const dateEndings = {
   rd: [3, 23]
 };
 
-export function getDisplayDate(_date) {
+export function getDisplayDate(_date: Date) {
   const date = _date.getDate();
   if (dateEndings.st.indexOf(date) !== -1) {
     return date + 'st';

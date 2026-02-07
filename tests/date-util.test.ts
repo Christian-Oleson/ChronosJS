@@ -267,11 +267,19 @@ describe('scrapeMonth', () => {
     });
   });
 
-  it('BUG: crashes for months needing only 4 rows (e.g., Feb 2026 starts Sunday)', () => {
+  it('should handle months needing only 4 rows (e.g., Feb 2026 starts Sunday)', () => {
     // February 2026 starts on Sunday and has 28 days = exactly 4 weeks.
-    // The function assumes at least 5 rows exist, causing tracker[4] to be
-    // undefined at the lastRowLength check, which throws a TypeError.
-    expect(() => scrapeMonth(new Date(2026, 1, 1))).toThrow();
+    const result = scrapeMonth(new Date(2026, 1, 1));
+    expect(result.month).toHaveLength(6);
+    const allDays: number[] = [];
+    result.month.forEach((week: any[]) => {
+      week.forEach((day: number | undefined) => {
+        if (day !== undefined) allDays.push(day);
+      });
+    });
+    expect(allDays).toHaveLength(28);
+    expect(result.month[0][0]).toBe(1);
+    expect(result.month[3][6]).toBe(28);
   });
 });
 
