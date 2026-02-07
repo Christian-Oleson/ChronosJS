@@ -1,10 +1,9 @@
 const path = require('path');
-const webpack = require('webpack');
 const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
 
 const ROOT_DIR = __dirname;
 module.exports = function (env) {
-  const production = env === 'production';
+  const production = env && env.production;
   let config = {
     entry: {
       simplepicker: [
@@ -25,8 +24,10 @@ module.exports = function (env) {
     target: 'web',
     mode: production ? 'production' : 'development',
     devtool: 'source-map',
+    optimization: {
+      moduleIds: 'deterministic'
+    },
     plugins: [
-      new webpack.HashedModuleIdsPlugin(),
       new MiniCSSExtractPlugin({
         filename: '[name].css',
         chunkFilename: '[id].css'
@@ -43,15 +44,14 @@ module.exports = function (env) {
         {
           loader: 'css-loader',
           options: {
-            sourceMap: true,
-            minimize: production
+            sourceMap: true
           }
         },
       ]
     },{
       test: /\.ts$/,
       use: 'ts-loader',
-      exclude: /node_modules/
+      exclude: [/node_modules/, /tests/]
     }
   ];
 
@@ -65,7 +65,7 @@ module.exports = function (env) {
       }
     });
 
-    // build a commonjs format file for comsption with
+    // build a commonjs format file for consumption with
     // build tools like webpack, and rollup.
     let nodeConfig = { output: {} };
     nodeConfig.output.libraryTarget = 'commonjs2';

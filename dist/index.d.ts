@@ -1,11 +1,11 @@
-declare type SimplePickerEvent = 'submit' | 'close';
+type SimplePickerEvent = 'submit' | 'close';
 interface SimplePickerOpts {
     zIndex?: number;
     compactMode?: boolean;
     disableTimeSection?: boolean;
     selectedDate?: Date;
 }
-declare type HandlerFunction = (...args: unknown[]) => void;
+type HandlerFunction = (...args: unknown[]) => void;
 interface EventHandlers {
     [key: string]: HandlerFunction[];
 }
