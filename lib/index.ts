@@ -78,8 +78,8 @@ class EasyEpoch {
 
     this.selectedDate = new Date();
     this.monthTracker = dateUtil.createMonthTracker();
-    this.injectTemplate(el);
-    this.init(el, opts);
+    const wrapper = this.injectTemplate(el);
+    this.init(wrapper, opts);
     this.initListeners();
 
     this._eventHandlers = {};
@@ -94,9 +94,9 @@ class EasyEpoch {
     this.$$ = (sel) => el.querySelectorAll(sel);
   }
 
-  init(el: HTMLElement, opts: EasyEpochOpts) {
-    this.$easyepochWrapper = <HTMLElement> el.querySelector('.easyepoch-wrapper');
-    this.initElMethod(this.$easyepochWrapper);
+  init(wrapper: HTMLElement, opts: EasyEpochOpts) {
+    this.$easyepochWrapper = wrapper;
+    this.initElMethod(wrapper);
 
     const { $, $$ } = this;
     this.$easyepoch = $('.easyepoch-date-picker');
@@ -209,10 +209,13 @@ class EasyEpoch {
     }
   }
 
-  injectTemplate(el: HTMLElement) {
+  injectTemplate(el: HTMLElement): HTMLElement {
     const $template = document.createElement('template');
     $template.innerHTML = htmlTemplate;
-    el.appendChild($template.content.cloneNode(true));
+    const content = $template.content.cloneNode(true) as DocumentFragment;
+    const wrapper = content.querySelector('.easyepoch-wrapper') as HTMLElement;
+    el.appendChild(content);
+    return wrapper;
   }
 
   clearRows() {
