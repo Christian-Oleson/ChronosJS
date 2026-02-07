@@ -23,7 +23,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Christian-Oleson/ChronosJS.git"
+    "url": "git+https://github.com/Christian-Oleson/EasyEpoch.git"
   },
   "keywords": [
     "date",
@@ -38,9 +38,9 @@
   "author": "Christian Oleson",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Christian-Oleson/ChronosJS/issues"
+    "url": "https://github.com/Christian-Oleson/EasyEpoch/issues"
   },
-  "homepage": "https://github.com/Christian-Oleson/ChronosJS#readme",
+  "homepage": "https://github.com/Christian-Oleson/EasyEpoch#readme",
   "devDependencies": {
     "@rspack/cli": "^1.7.5",
     "@rspack/core": "^1.7.5",
