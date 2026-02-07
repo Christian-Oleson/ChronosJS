@@ -440,6 +440,104 @@ describe('EasyEpoch public properties', () => {
   });
 });
 
+describe('EasyEpoch theming', () => {
+  it('should use dark theme by default (no theme class)', () => {
+    const picker = new EasyEpoch();
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    expect(wrapper.classList.contains('easyepoch-theme-light')).toBe(false);
+    expect(wrapper.classList.contains('easyepoch-theme-dark')).toBe(false);
+  });
+
+  it('should apply light theme via constructor option', () => {
+    const picker = new EasyEpoch({ theme: 'light' });
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    expect(wrapper.classList.contains('easyepoch-theme-light')).toBe(true);
+  });
+
+  it('should apply dark theme via constructor option', () => {
+    const picker = new EasyEpoch({ theme: 'dark' });
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    expect(wrapper.classList.contains('easyepoch-theme-dark')).toBe(true);
+  });
+
+  it('should apply custom theme object via constructor option', () => {
+    const picker = new EasyEpoch({ theme: { bg: '#ff0000', text: '#00ff00' } });
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    expect(wrapper.style.getPropertyValue('--easyepoch-bg')).toBe('#ff0000');
+    expect(wrapper.style.getPropertyValue('--easyepoch-text')).toBe('#00ff00');
+  });
+
+  it('should switch from dark to light theme at runtime with setTheme()', () => {
+    const picker = new EasyEpoch();
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    picker.setTheme('light');
+    expect(wrapper.classList.contains('easyepoch-theme-light')).toBe(true);
+  });
+
+  it('should switch from light to dark theme at runtime with setTheme()', () => {
+    const picker = new EasyEpoch({ theme: 'light' });
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    expect(wrapper.classList.contains('easyepoch-theme-light')).toBe(true);
+    picker.setTheme('dark');
+    expect(wrapper.classList.contains('easyepoch-theme-light')).toBe(false);
+    expect(wrapper.classList.contains('easyepoch-theme-dark')).toBe(true);
+  });
+
+  it('should apply custom theme object at runtime with setTheme()', () => {
+    const picker = new EasyEpoch();
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    picker.setTheme({ primary: '#ff6b6b', accent: '#ffd93d' });
+    expect(wrapper.style.getPropertyValue('--easyepoch-primary')).toBe('#ff6b6b');
+    expect(wrapper.style.getPropertyValue('--easyepoch-accent')).toBe('#ffd93d');
+  });
+
+  it('should clean up custom properties when switching from custom to built-in theme', () => {
+    const picker = new EasyEpoch();
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    picker.setTheme({ primary: '#ff6b6b' });
+    expect(wrapper.style.getPropertyValue('--easyepoch-primary')).toBe('#ff6b6b');
+
+    picker.setTheme('light');
+    expect(wrapper.style.getPropertyValue('--easyepoch-primary')).toBe('');
+    expect(wrapper.classList.contains('easyepoch-theme-light')).toBe(true);
+  });
+
+  it('should accept custom properties with -- prefix', () => {
+    const picker = new EasyEpoch();
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    picker.setTheme({ '--easyepoch-bg': '#123456' });
+    expect(wrapper.style.getPropertyValue('--easyepoch-bg')).toBe('#123456');
+  });
+
+  it('should remove previous theme class when switching themes', () => {
+    const picker = new EasyEpoch({ theme: 'light' });
+    const wrapper = document.querySelector('.easyepoch-wrapper') as HTMLElement;
+    expect(wrapper.classList.contains('easyepoch-theme-light')).toBe(true);
+
+    picker.setTheme('dark');
+    expect(wrapper.classList.contains('easyepoch-theme-light')).toBe(false);
+    expect(wrapper.classList.contains('easyepoch-theme-dark')).toBe(true);
+  });
+});
+
+describe('EasyEpoch inline SVG icons', () => {
+  it('should render SVG elements inside icon buttons', () => {
+    const picker = new EasyEpoch();
+    const icons = document.querySelectorAll('.easyepoch-icon');
+    icons.forEach(icon => {
+      const svg = icon.querySelector('svg');
+      expect(svg).not.toBeNull();
+    });
+  });
+
+  it('should use currentColor for stroke on SVG icons', () => {
+    const picker = new EasyEpoch();
+    const svg = document.querySelector('.easyepoch-icon svg');
+    expect(svg).not.toBeNull();
+    expect(svg!.getAttribute('stroke')).toBe('currentColor');
+  });
+});
+
 describe('Bug fixes', () => {
   describe('readableDate includes ordinal suffix', () => {
     it('readableDate should contain ordinal suffix like "1st"', () => {

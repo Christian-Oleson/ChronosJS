@@ -30,6 +30,11 @@ describe('htmlTemplate', () => {
     expect(htmlTemplate).toContain('easyepoch-icon-time');
   });
 
+  it('should contain inline SVG elements in icon buttons', () => {
+    expect(htmlTemplate).toContain('<svg');
+    expect(htmlTemplate).toContain('currentColor');
+  });
+
   it('should contain the time display with default value', () => {
     expect(htmlTemplate).toContain('easyepoch-time');
     expect(htmlTemplate).toContain('12:00 PM');

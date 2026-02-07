@@ -3,11 +3,14 @@ import { MonthTracker } from './date-util';
 import { htmlTemplate } from './template';
 
 type EasyEpochEvent = 'submit' | 'close';
+type EasyEpochTheme = 'light' | 'dark' | Record<string, string>;
+
 interface EasyEpochOpts {
   zIndex?: number;
   compactMode?: boolean;
   disableTimeSection?: boolean;
   selectedDate?: Date;
+  theme?: EasyEpochTheme;
 }
 
 const validListeners = [
@@ -138,6 +141,10 @@ class EasyEpoch {
     if (opts.compactMode) {
       this.compactMode();
     }
+
+    if (opts.theme) {
+      this.setTheme(opts.theme);
+    }
   }
 
   // Reset by selecting current date.
@@ -173,6 +180,33 @@ class EasyEpoch {
   enableTimeSection() {
     const { $timeSectionIcon } = this;
     $timeSectionIcon.style.visibility = 'visible';
+  }
+
+  setTheme(theme: EasyEpochTheme) {
+    const wrapper = this.$easyepochWrapper;
+
+    // Remove existing theme classes
+    wrapper.classList.remove('easyepoch-theme-light', 'easyepoch-theme-dark');
+
+    // Clear any inline custom properties from a previous custom theme
+    const style = wrapper.style;
+    for (let i = style.length - 1; i >= 0; i--) {
+      const prop = style[i];
+      if (prop.startsWith('--easyepoch-')) {
+        style.removeProperty(prop);
+      }
+    }
+
+    if (theme === 'light') {
+      wrapper.classList.add('easyepoch-theme-light');
+    } else if (theme === 'dark') {
+      wrapper.classList.add('easyepoch-theme-dark');
+    } else if (typeof theme === 'object') {
+      for (const key of Object.keys(theme)) {
+        const varName = key.startsWith('--') ? key : '--easyepoch-' + key;
+        style.setProperty(varName, theme[key]);
+      }
+    }
   }
 
   injectTemplate(el: HTMLElement) {

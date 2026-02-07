@@ -281,6 +281,35 @@
 
   <div class="section-label">Examples</div>
 
+  <!-- Example: Theming -->
+  <div class="example">
+    <div class="example-header">
+      <h2>Theming</h2>
+      <p>Switch between built-in <code>light</code> and <code>dark</code> themes at runtime with <code>setTheme()</code>.</p>
+    </div>
+    <div class="example-demo">
+      <div class="demo-row">
+        <button class="demo-btn" id="theme-open-btn">Open Picker</button>
+        <button class="demo-btn" id="theme-toggle-btn">Toggle Light / Dark</button>
+      </div>
+      <div class="demo-output" id="theme-output">Current theme: dark</div>
+    </div>
+    <div class="example-code"><span class="code-keyword">const</span> picker = <span class="code-keyword">new</span> <span class="code-function">EasyEpoch</span>({ theme: <span class="code-string">'dark'</span> });
+
+<span class="code-comment">// Switch at runtime</span>
+picker.<span class="code-function">setTheme</span>(<span class="code-string">'light'</span>);
+picker.<span class="code-function">setTheme</span>(<span class="code-string">'dark'</span>);
+
+<span class="code-comment">// Or pass a custom theme object</span>
+picker.<span class="code-function">setTheme</span>({
+  bg: <span class="code-string">'#0a0a0a'</span>,
+  primary: <span class="code-string">'#ff6b6b'</span>,
+  secondary: <span class="code-string">'#ffd93d'</span>,
+  accent: <span class="code-string">'#ff6b6b'</span>,
+  text: <span class="code-string">'#f0f0f0'</span>,
+});</div>
+  </div>
+
   <!-- Example 1: Basic Usage -->
   <div class="example">
     <div class="example-header">
@@ -443,6 +472,31 @@ picker.<span class="code-function">on</span>(<span class="code-string">'close'</
 
 <script src="easyepoch.js"></script>
 <script>
+  // Example: Theming
+  (function() {
+    var picker = new EasyEpoch({ zIndex: 10 });
+    var isDark = true;
+    var toggleBtn = document.getElementById('theme-toggle-btn');
+    var openBtn = document.getElementById('theme-open-btn');
+    var output = document.getElementById('theme-output');
+
+    openBtn.addEventListener('click', function() { picker.open(); });
+
+    toggleBtn.addEventListener('click', function() {
+      isDark = !isDark;
+      picker.setTheme(isDark ? 'dark' : 'light');
+      output.textContent = 'Current theme: ' + (isDark ? 'dark' : 'light');
+    });
+
+    picker.on('submit', function(date, readableDate) {
+      output.textContent = 'Selected: ' + readableDate;
+    });
+
+    picker.on('close', function() {
+      output.textContent = 'Current theme: ' + (isDark ? 'dark' : 'light');
+    });
+  })();
+
   // Example 1: Basic Usage
   (function() {
     var picker = new EasyEpoch({ zIndex: 10 });
